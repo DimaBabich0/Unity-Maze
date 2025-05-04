@@ -1,60 +1,112 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CameraScript : MonoBehaviour
 {
     private Vector3 offset;
+    private float minOffset = 2f;
+    private float maxOffset = 5f;
 
-    // cameraAnchor - òî÷êà ïðèâÿçêè êàìåðû
-    [SerializeField]
-    private Transform cameraAnchor;
+    // cameraAnchor - Ñ‚Ð¾Ñ‡ÐºÐ° Ð¿Ñ€Ð¸Ð²ÑÐ·ÐºÐ¸ ÐºÐ°Ð¼ÐµÑ€Ñ‹
+    [SerializeField] private Transform cameraAnchor;
 
     private InputAction lookAction;
+    private bool isFpv;
+    private float minAngleX = 20f;
+    private float maxAngleX = 60f;
+    private float minAngleXFpv = -15f;
+    private float maxAngleXFpv = 15f;
+    private float angleX0;
+    private float angleY0;
     private float angelY = 0f;
     private float sensitivityX = 70f;
-
     private float _angelX = 0f;
     private float angelX
     {
         get { return _angelX; }
         set
-        { 
-            if (value > 35 && value < 45)
+        {
+            if (!isFpv && (value > minAngleX && value < maxAngleX))
             {
+                Debug.Log($"AngleX in RPG: {this.transform.eulerAngles.x}");
+                _angelX = value;
+            }
+            else if (isFpv && (value > minAngleXFpv && value < maxAngleXFpv))
+            {
+                Debug.Log($"AngleX in FPV: {this.transform.eulerAngles.x}");
                 _angelX = value;
             }
         }
     }
     private float sensitivityY = 10f;
 
+    public static bool isFixed = false;
+    public static Transform fixedCameraPosition = null!;
 
     void Start()
     {
         offset = this.transform.position - cameraAnchor.position;
         lookAction = InputSystem.actions.FindAction("Look");
 
-        angelX = this.transform.rotation.eulerAngles.x;
-        angelY = this.transform.rotation.eulerAngles.y;
+        angleX0 = angelX = this.transform.rotation.eulerAngles.x;
+        angleY0 = angelY = this.transform.rotation.eulerAngles.y;
+
+        isFpv = offset.magnitude < minOffset;
     }
 
     void Update()
     {
-        // Âðàùåíèå
-        // Vector2 lookValue = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")); // Before Unity 6
-        // lookValue è Input.GetAxis âîçðàùàþò äàííûå î ÈÇÌÅÍÅÍÈÈ êóðñîðà, à íå åãî ïîçèöèþ. Åñëè êóðñîð ìûøè íå äâèãàåòñÿ, òî òîãäà ñèãíàë = 0. ×òîáû çíàòü ïîëíûé óãîë ïîâîðîòà íåîáõîäèìî íàêàïëèâàòü âñå ñèãíàëû (èíòåãðèðîâàòü)
+        if (isFixed)
+        {
+            this.transform.position = fixedCameraPosition.position;
+            this.transform.rotation = fixedCameraPosition.rotation;
+        }
+        else
+        {
+            // Ð’Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ
+            // Vector2 lookValue = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")); // Before Unity 6
+            // lookValue Ð¸ Input.GetAxis Ð²Ð¾Ð·Ñ€Ð°Ñ‰Ð°ÑŽÑ‚ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð¾ Ð˜Ð—ÐœÐ•ÐÐ•ÐÐ˜Ð˜ ÐºÑƒÑ€ÑÐ¾Ñ€Ð°, Ð° Ð½Ðµ ÐµÐ³Ð¾ Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ. Ð•ÑÐ»Ð¸ ÐºÑƒÑ€ÑÐ¾Ñ€ Ð¼Ñ‹ÑˆÐ¸ Ð½Ðµ Ð´Ð²Ð¸Ð³Ð°ÐµÑ‚ÑÑ, Ñ‚Ð¾ Ñ‚Ð¾Ð³Ð´Ð° ÑÐ¸Ð³Ð½Ð°Ð» = 0. Ð§Ñ‚Ð¾Ð±Ñ‹ Ð·Ð½Ð°Ñ‚ÑŒ Ð¿Ð¾Ð»Ð½Ñ‹Ð¹ ÑƒÐ³Ð¾Ð» Ð¿Ð¾Ð²Ð¾Ñ€Ð¾Ñ‚Ð° Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ð¾ Ð½Ð°ÐºÐ°Ð¿Ð»Ð¸Ð²Ð°Ñ‚ÑŒ Ð²ÑÐµ ÑÐ¸Ð³Ð½Ð°Ð»Ñ‹ (Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ)
 
-        Vector2 lookValue = Time.deltaTime * lookAction.ReadValue<Vector2>();
-        angelY += lookValue.x * sensitivityX;
-        angelX -= lookValue.y * sensitivityY;
-        this.transform.eulerAngles = new Vector3(angelX, angelY, 0);
+            Vector2 lookValue = Time.deltaTime * lookAction.ReadValue<Vector2>();
+            angelY += lookValue.x * sensitivityX;
+            angelX -= lookValue.y * sensitivityY;
+            this.transform.eulerAngles = new Vector3(angelX, angelY, 0);
 
-        //--------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------------
 
-        Debug.Log($"angelX: {angelX}");
+            // Ð¡Ð»ÐµÐ´Ð¾Ð²Ð°Ð½Ð¸Ðµ
+            // this.transform.position = cameraAnchor.position + offset; // Ð±ÐµÐ· Ð¿Ð¾Ð²Ð¾Ñ€Ð¾Ñ‚Ð° ÐºÐ°Ð¼ÐµÑ€Ñ‹
+            this.transform.position = cameraAnchor.position +
+                Quaternion.Euler(angelX - angleX0, angelY - angleY0, 0f) * offset; // Ñ Ð¿Ð¾Ð²Ð¾Ñ€Ð¾Ñ‚Ð¾Ð¼ Ð²ÐµÐºÑ‚Ð¾Ñ€Ð° offset
 
-        // Ñëåäîâàíèå
-        // this.transform.position = cameraAnchor.position + offset; // áåç ïîâîðîòà êàìåðû
-        this.transform.position = cameraAnchor.position +
-            Quaternion.Euler(0f, angelY, 0f) * offset; // ñ ïîâîðîòîì âåêòîðà offset
+            //--------------------------------------------------------------------------------
+
+            // ÐŸÑ€Ð¸Ð±Ð»Ð¸Ð¶ÐµÐ½Ð¸Ðµ/ÐžÑ‚Ð´Ð°Ð»ÐµÐ½Ð¸Ðµ
+            Vector2 zoom = Input.mouseScrollDelta;
+            if (zoom.y > 0 && !isFpv)
+            {
+                offset *= 0.9f;
+
+                if (offset.magnitude < minOffset)
+                {
+                    offset *= 0.01f;
+                    isFpv = true;
+                    angelX = (maxAngleXFpv + minAngleXFpv) / 2;
+                }
+            }
+            else if (zoom.y < 0)
+            {
+                if (isFpv)
+                {
+                    offset *= minOffset / offset.magnitude;
+                    isFpv = false;
+                    angelX = (maxAngleX + minAngleX) / 2;
+                }
+                if (offset.magnitude < maxOffset)
+                {
+                    offset *= 1.1f;
+                }
+            }
+        } 
     }
 }
