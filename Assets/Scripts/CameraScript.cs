@@ -12,10 +12,10 @@ public class CameraScript : MonoBehaviour
 
     private InputAction lookAction;
     private bool isFpv;
-    private float minAngleX = 20f;
+    private float minAngleX = 10f;
     private float maxAngleX = 60f;
-    private float minAngleXFpv = -15f;
-    private float maxAngleXFpv = 15f;
+    private float minAngleXFpv = -20f;
+    private float maxAngleXFpv = 20f;
     private float angleX0;
     private float angleY0;
     private float angelY = 0f;
@@ -28,12 +28,12 @@ public class CameraScript : MonoBehaviour
         {
             if (!isFpv && (value > minAngleX && value < maxAngleX))
             {
-                Debug.Log($"AngleX in RPG: {this.transform.eulerAngles.x}");
+                //Debug.Log($"AngleX in RPG: {this.transform.eulerAngles.x}");
                 _angelX = value;
             }
             else if (isFpv && (value > minAngleXFpv && value < maxAngleXFpv))
             {
-                Debug.Log($"AngleX in FPV: {this.transform.eulerAngles.x}");
+                //Debug.Log($"AngleX in FPV: {this.transform.eulerAngles.x}");
                 _angelX = value;
             }
         }
