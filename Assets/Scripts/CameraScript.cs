@@ -11,8 +11,7 @@ public class CameraScript : MonoBehaviour
     [SerializeField] private Transform cameraAnchor;
 
     private InputAction lookAction;
-    private bool isFpv;
-    private float minAngleX = 10f;
+    private float minAngleX = 15f;
     private float maxAngleX = 60f;
     private float minAngleXFpv = -20f;
     private float maxAngleXFpv = 20f;
@@ -26,12 +25,12 @@ public class CameraScript : MonoBehaviour
         get { return _angelX; }
         set
         {
-            if (!isFpv && (value > minAngleX && value < maxAngleX))
+            if (!GameState.isFpv && (value > minAngleX && value < maxAngleX))
             {
                 //Debug.Log($"AngleX in RPG: {this.transform.eulerAngles.x}");
                 _angelX = value;
             }
-            else if (isFpv && (value > minAngleXFpv && value < maxAngleXFpv))
+            else if (GameState.isFpv && (value > minAngleXFpv && value < maxAngleXFpv))
             {
                 //Debug.Log($"AngleX in FPV: {this.transform.eulerAngles.x}");
                 _angelX = value;
@@ -51,7 +50,7 @@ public class CameraScript : MonoBehaviour
         angleX0 = angelX = this.transform.rotation.eulerAngles.x;
         angleY0 = angelY = this.transform.rotation.eulerAngles.y;
 
-        isFpv = offset.magnitude < minOffset;
+        GameState.isFpv = offset.magnitude < minOffset;
     }
 
     void Update()
@@ -83,23 +82,25 @@ public class CameraScript : MonoBehaviour
 
             // Приближение/Отдаление
             Vector2 zoom = Input.mouseScrollDelta;
-            if (zoom.y > 0 && !isFpv)
+            if (zoom.y > 0 && !GameState.isFpv)
             {
                 offset *= 0.9f;
 
                 if (offset.magnitude < minOffset)
                 {
                     offset *= 0.01f;
-                    isFpv = true;
+                    GameState.isFpv = true;
+                    Debug.Log($"isFpv changed: {GameState.isFpv}");
                     angelX = (maxAngleXFpv + minAngleXFpv) / 2;
                 }
             }
             else if (zoom.y < 0)
             {
-                if (isFpv)
+                if (GameState.isFpv)
                 {
                     offset *= minOffset / offset.magnitude;
-                    isFpv = false;
+                    GameState.isFpv = false;
+                    Debug.Log($"isFpv changed: {GameState.isFpv}");
                     angelX = (maxAngleX + minAngleX) / 2;
                 }
                 if (offset.magnitude < maxOffset)

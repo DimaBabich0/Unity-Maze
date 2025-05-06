@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BulbScript : MonoBehaviour
 {
-    private Light light;
+    private Light _light;
     private Renderer bulb;
 
     [SerializeField] private Material bulbOff;
@@ -12,7 +12,7 @@ public class BulbScript : MonoBehaviour
 
     void Start()
     {
-        light = GetComponentInChildren<Light>();
+        _light = GetComponentInChildren<Light>();
         bulb = GetComponentsInChildren<Renderer>()
         .FirstOrDefault(r => r.gameObject != this.gameObject);
 
@@ -20,11 +20,28 @@ public class BulbScript : MonoBehaviour
         {
             bulbOff = bulb.material;
         }
+
+        GameState.AddListener(onGameStateChanged);
     }
 
-    void Update()
+    private void CheckMaterial()
     {
-        if (light == null || bulb == null) return;
-        bulb.material = light.intensity > 0 ? bulbOn : bulbOff;
+        if (!GameState.isDay && !GameState.isFpv)
+            bulb.material = bulbOn;
+        else
+            bulb.material = bulbOff;
+    }
+
+    private void onGameStateChanged(string fieldName)
+    {
+        if (fieldName == nameof(GameState.isDay))
+            CheckMaterial();
+        else if (fieldName == nameof(GameState.isFpv))
+            CheckMaterial();
+    }
+
+    private void OnDestroy()
+    {
+        GameState.RemoveListener(onGameStateChanged);
     }
 }

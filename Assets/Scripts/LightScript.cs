@@ -6,12 +6,11 @@ public class LightScript : MonoBehaviour
 {
     private Light[] dayLights;
     private Light[] nightLights;
-    [SerializeField] private Material skyboxDay;
-    [SerializeField] private Material skyboxNight;
-    private bool isDay;
 
     void Start()
     {
+        GameState.AddListener(onGameStateChanged);
+
         dayLights = GameObject
             .FindGameObjectsWithTag("Day")
             .Select(g => g.GetComponent<Light>())
@@ -22,47 +21,62 @@ public class LightScript : MonoBehaviour
             .Select(g => g.GetComponent<Light>())
             .ToArray();
 
-        isDay = true;
-        ChangeToDay();
+        ToggleLight();
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.N))
+            GameState.isDay = !GameState.isDay;
+    }  
+
+    private void ToggleLight()
+    {
+        Debug.Log($"LightScript: isDay = {GameState.isDay}; isFpv = {GameState.isFpv}");
+        if (GameState.isDay) // day lights
         {
-            isDay = !isDay;
-            if (isDay)
-            {
-                ChangeToDay();
-            }
-            else
-            {
-                ChangeToNight();
-            }
+            foreach (Light light in dayLights)
+                light.intensity = 1.0f;
+
+            foreach (Light light in nightLights)
+                light.intensity = 0.0f;
+
+            RenderSettings.ambientIntensity = 1.0f;
+            RenderSettings.reflectionIntensity = 1.0f;
+        }
+        else // night lights
+        {
+            foreach (Light light in dayLights)
+                light.intensity = 0.0f;
+
+            foreach (Light light in nightLights)
+                light.intensity = GameState.isFpv ? 0.0f : 1.0f;
+
+            RenderSettings.ambientIntensity = 0.2f;
+            RenderSettings.reflectionIntensity = 0.2f;
         }
     }
 
-    private void ChangeToDay()
+    private void FpvChanged()
     {
-        foreach (Light light in dayLights)
-            light.intensity = 1.0f;
-        foreach (Light light in nightLights)
-            light.intensity = 0.0f;
-
-        RenderSettings.ambientIntensity = 1.0f;
-        RenderSettings.reflectionIntensity = 1.0f;
-        RenderSettings.skybox = skyboxDay;
+        Debug.Log($"LightScript: isDay = {GameState.isDay}; isFpv = {GameState.isFpv}");
+        if (!GameState.isDay)
+        {
+            foreach (Light light in nightLights)
+                light.intensity = GameState.isFpv ? 0.0f : 1.0f;
+        }
     }
 
-    private void ChangeToNight()
+    private void onGameStateChanged(string fieldName)
     {
-        foreach (Light light in dayLights)
-            light.intensity = 0.0f;
-        foreach (Light light in nightLights)
-            light.intensity = 1.0f;
+        if (fieldName == nameof(GameState.isDay))
+            ToggleLight();
+        else if (fieldName == nameof(GameState.isFpv))
+            FpvChanged();
+    }
 
-        RenderSettings.ambientIntensity = 0.2f;
-        RenderSettings.reflectionIntensity = 0.2f;
-        RenderSettings.skybox = skyboxNight;
+    private void OnDestroy()
+    {
+        GameState.RemoveListener(onGameStateChanged);
     }
 }

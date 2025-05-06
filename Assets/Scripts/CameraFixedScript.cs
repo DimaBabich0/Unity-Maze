@@ -28,9 +28,9 @@ public class CameraFixedScript : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1 + i))
                 {
+                    //Debug.Log($"Pressed button: {i + 1}; Name: {obj.name} {obj.position}");
                     Transform obj = cameraPositions[i].transform;
                     CameraScript.fixedCameraPosition = obj;
-                    Debug.Log($"Pressed button: {i + 1}; Name: {obj.name} {obj.position}");
                 }
             }
         }
