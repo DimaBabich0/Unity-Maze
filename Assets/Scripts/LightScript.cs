@@ -32,7 +32,7 @@ public class LightScript : MonoBehaviour
 
     private void ToggleLight()
     {
-        Debug.Log($"LightScript: isDay = {GameState.isDay}; isFpv = {GameState.isFpv}");
+        //Debug.Log($"LightScript: isDay = {GameState.isDay}; isFpv = {GameState.isFpv}");
         if (GameState.isDay) // day lights
         {
             foreach (Light light in dayLights)

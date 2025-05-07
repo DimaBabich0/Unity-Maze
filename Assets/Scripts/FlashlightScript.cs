@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.VisualScripting;
+using UnityEngine;
 
 public class FlashlightScript : MonoBehaviour
 {
@@ -8,12 +9,11 @@ public class FlashlightScript : MonoBehaviour
     public static float charge = 1.0f;
     private float chargeLifetime = 60.0f;
 
-    private float timer = 0f;
+    private float counterTimer = 0f;
     private float counterCost = 0f;
     private float interval = 1f;
     private const float minAngle = 15f;
     private const float maxAngle = 45f;
-
 
     void Start()
     {
@@ -30,11 +30,12 @@ public class FlashlightScript : MonoBehaviour
     {
         if (player == null) return;
 
+        this.transform.position = player.transform.position;
+        this.transform.forward = Camera.main.transform.forward;
+
         if (GameState.isFpv && !GameState.isDay)
         {
-            this.transform.position = player.transform.position;
-            this.transform.forward = Camera.main.transform.forward;
-            _light.intensity = charge;
+            _light.intensity = Mathf.Clamp01(charge);
 
             if (Input.GetKey(KeyCode.Q) && _light.spotAngle >= minAngle)
             {
@@ -51,20 +52,36 @@ public class FlashlightScript : MonoBehaviour
             }
 
             float cost = Time.deltaTime / chargeLifetime * (_light.spotAngle / 30);
-            charge = Mathf.Clamp01(charge - cost);
+            charge = charge < 0 ? 0 : charge - cost;
             counterCost += cost;
 
-            timer += Time.deltaTime;
-            if (timer >= interval)
+            counterTimer += Time.deltaTime;
+            if (counterTimer >= interval)
             {
                 Debug.Log($"Angle: {_light.spotAngle:F2}; Charge: {charge:F2}; Consumption in second: {counterCost:F4}");
-                timer = 0f;
+                counterTimer = 0f;
                 counterCost = 0f;
             }
         }
         else
         {
             _light.intensity = 0.0f;
+        }
+    }
+
+    private void OnTriggerEnter(Collider obj)
+    {
+        if (obj.gameObject.CompareTag("Battery"))
+        {
+            float batteryCharge = obj.GetComponent<BatteryScript>().batteryCharge;
+            charge += batteryCharge;
+            GameObject.Destroy(obj.gameObject);
+            ToasterScript.Toast(
+                $"You find a battery with {batteryCharge.ToString("F2").Replace(',', '.')} charge.\n" +
+                $"Now your charge is {charge.ToString("F2").Replace(',','.')}",
+                5.0f);
+
+            //Debug.Log($"Battery collected; Charge: {charge:F2}");
         }
     }
 }
