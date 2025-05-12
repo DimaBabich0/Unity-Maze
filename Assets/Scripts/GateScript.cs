@@ -12,11 +12,11 @@ public class GateScript : MonoBehaviour
     [SerializeField] private string keyColor = "Red";
     private bool isKeyCollected = false;
     private bool isKeyInTime = true;
-    public bool isOpen = false;
+    public bool isOpen { get; private set; } = false;
 
     void Start()
     {
-        GameState.AddListener(onGameStateChanged);
+        GameEventSystem.Subscribe(OnGameEvent);
     }
 
     void Update()
@@ -33,31 +33,43 @@ public class GateScript : MonoBehaviour
         {
             if (!isKeyCollected)
             {
-                ToasterScript.Toast($"The gate is closed.\nYou need to find {keyColor.ToLower()} key to open it.", 4f);
+                GameEventSystem.TriggerEvent(new GameEvent
+                {
+                    toast = $"The gate is closed.\nYou need to find {keyColor.ToLower()} key to open it.",
+                    toastTimer = 4f,
+                });
             }
             else if (!isOpen)
             {
-                ToasterScript.Toast($"You open the {keyColor.ToLower()} gate.", 1f);
+                GameEventSystem.TriggerEvent(new GameEvent
+                {
+                    toast = $"You open the {keyColor.ToLower()} gate.",
+                    toastTimer = 1f,
+                });
                 isOpen = true;
                 openTime = isKeyInTime ? openTimeFast : openTimeSlow;
             }
         }
     }
 
-    private void onGameStateChanged(string fieldName)
+    private void OnGameEvent(GameEvent gameEvent)
     {
-        if (fieldName == $"isKey{keyColor}Collected")
+        if (gameEvent.type == $"isKey{keyColor}Collected")
         {
             isKeyCollected = true;
-        }
-        else if (fieldName == $"isKey{keyColor}InTime")
-        {
-            isKeyInTime = false;
+
+            if (gameEvent.payload is bool payload)
+                isKeyInTime = payload;
+            else
+            {
+                Debug.LogWarning($"gameEvent: {gameEvent} had wrong type of payload (waiting for bool, but get {gameEvent.GetType()})");
+                isKeyInTime = false;
+            }
         }
     }
 
     private void OnDestroy()
     {
-        GameState.RemoveListener(onGameStateChanged);
+        GameEventSystem.Unsubscribe(OnGameEvent);
     }
 }

@@ -51,7 +51,7 @@ public class ToasterScript : MonoBehaviour
         messageBox2 = t.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
         content2.SetActive(false);
 
-        GameState.AddListener(onGameStateChanged);
+        GameEventSystem.Subscribe(OnGameEvent);
     }
 
     void Update()
@@ -139,18 +139,17 @@ public class ToasterScript : MonoBehaviour
         ));
     }
 
-    private void onGameStateChanged(string fieldName)
+    private void OnGameEvent(GameEvent gameEvent)
     {
-        if (fieldName == nameof(GameState.isKeyRedCollected))
-            Toast("You find a red key.\nYou can now open red gates", 2f);
-        else if (fieldName == nameof(GameState.isKeyBlueCollected))
-            Toast("You find a blue key.\nYou can now open blue gates", 2f);
-        else if (fieldName == nameof(GameState.isKeyGreenCollected))
-            Toast("You find a green key.\nYou can now open green gates", 2f);
+        if (gameEvent.toast is string toast &&
+            gameEvent.toastTimer is float toastTimer)
+        {
+            Toast(toast, toastTimer);
+        }
     }
 
     private void OnDestroy()
     {
-        GameState.RemoveListener(onGameStateChanged);
+        GameEventSystem.Unsubscribe(OnGameEvent);
     }
 }

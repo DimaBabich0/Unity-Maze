@@ -12,6 +12,7 @@ public class KeyScript : MonoBehaviour
     private Image indicatorImage;
     [SerializeField] private float timeout = 5.0f;
     private float leftTime;
+    private bool isInTime = true;
 
     void Start()
     {
@@ -19,7 +20,6 @@ public class KeyScript : MonoBehaviour
         indicatorImage = transform.Find("Indicator/Canvas/Foreground").GetComponent<Image>();
         indicatorImage.fillAmount = 1.0f;
         leftTime = timeout;
-        GameState.SetProperty($"isKey{keyColor}InTime", true);
 
         isPrevGateOpen = prevGate == null;
 
@@ -29,6 +29,8 @@ public class KeyScript : MonoBehaviour
             Mathf.Clamp01(2 * indicatorImage.fillAmount),
             0.0f
         );
+
+        isInTime = true;
     }
 
     void Update()
@@ -52,7 +54,7 @@ public class KeyScript : MonoBehaviour
             leftTime -= Time.deltaTime;
             if (leftTime < 0)
             {
-                GameState.SetProperty($"isKey{keyColor}InTime", false);
+                isInTime = false;
             }
         }
     }
@@ -61,7 +63,13 @@ public class KeyScript : MonoBehaviour
     {
         if (obj.name == "Player")
         {
-            GameState.SetProperty($"isKey{keyColor}Collected", true);
+            GameEventSystem.TriggerEvent(new GameEvent
+            {
+                type = $"isKey{keyColor}Collected",
+                payload = isInTime,
+                toast = $"You find a {keyColor.ToLower()} key.\nYou can now open {keyColor.ToLower()} gates.",
+                toastTimer = 3f,
+            });
             Destroy(this.gameObject);
         }
     }
