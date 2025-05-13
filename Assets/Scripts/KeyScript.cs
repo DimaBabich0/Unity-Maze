@@ -69,6 +69,7 @@ public class KeyScript : MonoBehaviour
                 payload = isInTime,
                 toast = $"You find a {keyColor.ToLower()} key.\nYou can now open {keyColor.ToLower()} gates.",
                 toastTimer = 3f,
+                sound = isInTime ? EffectsSounds.keyPickUpInTime : EffectsSounds.keyPickUpOutOfTime,
             });
             Destroy(this.gameObject);
         }

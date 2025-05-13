@@ -13,17 +13,32 @@ public class GateScript : MonoBehaviour
     private bool isKeyCollected = false;
     private bool isKeyInTime = true;
     public bool isOpen { get; private set; } = false;
+    private bool isOpened = false;
+
+    private AudioSource[] audioSources;
 
     void Start()
     {
+        audioSources = GetComponents<AudioSource>();
         GameEventSystem.Subscribe(OnGameEvent);
     }
 
     void Update()
     {
-        if (isOpen && -transform.localPosition.magnitude > size)
+        if (isOpen && !isOpened && -transform.localPosition.magnitude > size)
         {
             transform.Translate(size * Time.deltaTime / openTime * openDirection);
+            if (-transform.localPosition.magnitude <= size)
+            {
+                isOpened = true;
+                if (audioSources != null)
+                {
+                    foreach (var source in audioSources)
+                    {
+                        source.Stop();
+                    }
+                }
+            }
         }
     }
 
@@ -48,6 +63,15 @@ public class GateScript : MonoBehaviour
                 });
                 isOpen = true;
                 openTime = isKeyInTime ? openTimeFast : openTimeSlow;
+
+                if (audioSources == null || audioSources.Length == 0) return;
+                if (audioSources.Length == 1)
+                    audioSources[0].Play();
+
+                else if (audioSources.Length >= 2)
+                {
+                    (isKeyInTime ? audioSources[0] : audioSources[1]).Play();
+                }
             }
         }
     }

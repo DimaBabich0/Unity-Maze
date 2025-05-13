@@ -141,10 +141,10 @@ public class ToasterScript : MonoBehaviour
 
     private void OnGameEvent(GameEvent gameEvent)
     {
-        if (gameEvent.toast is string toast &&
-            gameEvent.toastTimer is float toastTimer)
+        if (!string.IsNullOrEmpty(gameEvent.toast) &&
+            !float.IsNaN(gameEvent.toastTimer))
         {
-            Toast(toast, toastTimer);
+            Toast(gameEvent.toast, gameEvent.toastTimer);
         }
     }
 

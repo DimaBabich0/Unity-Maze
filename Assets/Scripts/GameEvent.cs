@@ -4,4 +4,5 @@ public class GameEvent
     public object payload { get; set; } = null;
     public string toast { get; set; } = null;
     public float toastTimer { get; set; } = float.NaN;
+    public string sound { get; set; } = null;
 }

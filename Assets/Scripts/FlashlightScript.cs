@@ -75,13 +75,16 @@ public class FlashlightScript : MonoBehaviour
         {
             float batteryCharge = obj.GetComponent<BatteryScript>().batteryCharge;
             charge += batteryCharge;
-            GameObject.Destroy(obj.gameObject);
-            ToasterScript.Toast(
-                $"You find a battery with {batteryCharge.ToString("F2").Replace(',', '.')} charge.\n" +
-                $"Now your charge is {charge.ToString("F2").Replace(',','.')}",
-                5.0f);
-
+            GameEventSystem.TriggerEvent(new GameEvent
+            {
+                type = "battery",
+                toast = $"You find a battery with {batteryCharge.ToString("F2").Replace(',', '.')} charge.\n" +
+                $"Now your charge is {charge.ToString("F2").Replace(',', '.')}",
+                toastTimer = 5.0f,
+                sound = EffectsSounds.batteryPickUp
+            });
             //Debug.Log($"Battery collected; Charge: {charge:F2}");
+            GameObject.Destroy(obj.gameObject);
         }
     }
 }
