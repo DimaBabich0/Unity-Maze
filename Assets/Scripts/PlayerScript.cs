@@ -36,6 +36,6 @@ public class PlayerScript : MonoBehaviour
         Vector3 force = 
             camForward * moveValue.y +      // сигнал Y - вдоль исправленного вектора forward
             camRight * moveValue.x;         // сигнал X - вдоль вектора right
-        rb.AddForce(force);
+        rb.AddForce(force * Time.timeScale);
     }
 }

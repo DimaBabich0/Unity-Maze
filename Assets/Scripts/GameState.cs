@@ -37,6 +37,38 @@ public class GameState
     }
     #endregion
 
+    #region float effectsVolume
+    private static float _effectsVolume = 0.1f;
+    public static float effectsVolume
+    {
+        get => _effectsVolume;
+        set
+        {
+            if (_effectsVolume != value)
+            {
+                _effectsVolume = value;
+                Notify(nameof(_effectsVolume));
+            }
+        }
+    }
+    #endregion
+
+    #region float musicVolume
+    private static float _musicVolume = 0.1f;
+    public static float musicVolume
+    {
+        get => _musicVolume;
+        set
+        {
+            if (_musicVolume != value)
+            {
+                _musicVolume = value;
+                Notify(nameof(_musicVolume));
+            }
+        }
+    }
+    #endregion
+
     #region Change Notifier
     private static List<Action<string>> listeners = new List<Action<string>>();
     public static void AddListener(Action<string> listener)

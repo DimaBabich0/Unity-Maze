@@ -40,6 +40,14 @@ public class GateScript : MonoBehaviour
                 }
             }
         }
+
+        if (audioSources == null || audioSources.Length == 0) return;
+        else if (audioSources.Length == 1 && audioSources[0].isPlaying)
+            audioSources[0].volume = Time.timeScale == 0.0f ? 0.0f : GameState.effectsVolume;
+        else if (audioSources.Length >= 2 && audioSources[0].isPlaying || audioSources[1].isPlaying)
+        {
+            audioSources[0].volume = audioSources[1].volume = Time.timeScale == 0.0f ? 0.0f : GameState.effectsVolume;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -67,7 +75,6 @@ public class GateScript : MonoBehaviour
                 if (audioSources == null || audioSources.Length == 0) return;
                 if (audioSources.Length == 1)
                     audioSources[0].Play();
-
                 else if (audioSources.Length >= 2)
                 {
                     (isKeyInTime ? audioSources[0] : audioSources[1]).Play();
