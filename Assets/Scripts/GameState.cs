@@ -37,24 +37,40 @@ public class GameState
     }
     #endregion
 
-    #region float effectsVolume
-    private static float _effectsVolume = 0.1f;
-    public static float effectsVolume
+    #region float singleSfxVolume
+    private static float _singleSfxVolume = 0.1f;
+    public static float singleSfxVolume
     {
-        get => _effectsVolume;
+        get => _singleSfxVolume;
         set
         {
-            if (_effectsVolume != value)
+            if (_singleSfxVolume != value)
             {
-                _effectsVolume = value;
-                Notify(nameof(_effectsVolume));
+                _singleSfxVolume = value;
+                Notify(nameof(singleSfxVolume));
+            }
+        }
+    }
+    #endregion
+
+    #region float reusableSfxVolume
+    private static float _reusableSfxVolume = 0.1f;
+    public static float reusableSfxVolume
+    {
+        get => _reusableSfxVolume;
+        set
+        {
+            if (_reusableSfxVolume != value)
+            {
+                _reusableSfxVolume = value;
+                Notify(nameof(reusableSfxVolume));
             }
         }
     }
     #endregion
 
     #region float musicVolume
-    private static float _musicVolume = 0.1f;
+    private static float _musicVolume = 0.05f;
     public static float musicVolume
     {
         get => _musicVolume;
@@ -63,7 +79,7 @@ public class GameState
             if (_musicVolume != value)
             {
                 _musicVolume = value;
-                Notify(nameof(_musicVolume));
+                Notify(nameof(musicVolume));
             }
         }
     }
@@ -74,6 +90,7 @@ public class GameState
     public static void AddListener(Action<string> listener)
     {
         listeners.Add(listener);
+        listener(null);
     }
     public static void RemoveListener(Action<string> listener)
     {

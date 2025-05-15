@@ -18,7 +18,7 @@ public class SkyboxScript : MonoBehaviour
 
     private void onGameStateChanged(string fieldName)
     {
-        if (fieldName == nameof(GameState.isDay))
+        if (fieldName == null || fieldName == nameof(GameState.isDay))
             ChangeSkybox();
     }
 

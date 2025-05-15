@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using UnityEditor.SettingsManagement;
 using UnityEngine;
 
 public class LightScript : MonoBehaviour

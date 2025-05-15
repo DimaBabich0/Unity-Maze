@@ -3,25 +3,20 @@ using UnityEngine;
 
 public class EffectsScript : MonoBehaviour
 {
-    private AudioSource keyPickUpInTimeSound;
-    private AudioSource keyPickUpOutOfTimeSound;
-    private AudioSource batteryPickUpSound;
-
+    private AudioSource keyPickUpInTimeSource;
+    private AudioSource keyPickUpOutOfTimeSource;
+    private AudioSource batteryPickUpSource;
 
     void Start()
     {
         AudioSource[] audioSources = GetComponents<AudioSource>();
 
-        keyPickUpInTimeSound = audioSources[0];
-        keyPickUpOutOfTimeSound = audioSources[1];
-        batteryPickUpSound = audioSources[2];
+        keyPickUpInTimeSource = audioSources[0];
+        keyPickUpOutOfTimeSource = audioSources[1];
+        batteryPickUpSource = audioSources[2];
 
         GameEventSystem.Subscribe(OnGameEvent);
-    }
-
-    void Update()
-    {
-        
+        GameState.AddListener(onGameStateChanged);
     }
 
     private void OnGameEvent(GameEvent gameEvent)
@@ -30,16 +25,27 @@ public class EffectsScript : MonoBehaviour
         {
             switch (gameEvent.sound)
             {
-                case EffectsSounds.keyPickUpInTime: keyPickUpInTimeSound.Play(); break;
-                case EffectsSounds.keyPickUpOutOfTime: keyPickUpOutOfTimeSound.Play(); break;
-                case EffectsSounds.batteryPickUp: batteryPickUpSound.Play(); break;
+                case EffectsSounds.keyPickUpInTime: keyPickUpInTimeSource.Play(); break;
+                case EffectsSounds.keyPickUpOutOfTime: keyPickUpOutOfTimeSource.Play(); break;
+                case EffectsSounds.batteryPickUp: batteryPickUpSource.Play(); break;
                 default: Debug.LogWarning($"Sound not found in effectPlays: {gameEvent.sound}"); break;
             }
+        }
+    }
+
+    private void onGameStateChanged(string fieldName)
+    {
+        if (fieldName == null || fieldName == nameof(GameState.singleSfxVolume))
+        {
+            keyPickUpInTimeSource.volume =
+            keyPickUpOutOfTimeSource.volume =
+            batteryPickUpSource.volume = GameState.singleSfxVolume;
         }
     }
 
     private void OnDestroy()
     {
         GameEventSystem.Unsubscribe(OnGameEvent);
+        GameState.RemoveListener(onGameStateChanged);
     }
 }

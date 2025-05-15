@@ -81,7 +81,7 @@ public class CameraScript : MonoBehaviour
             //--------------------------------------------------------------------------------
 
             // Приближение/Отдаление
-            Vector2 zoom = Input.mouseScrollDelta;
+            Vector2 zoom = Input.mouseScrollDelta * Time.timeScale;
             if (zoom.y > 0 && !GameState.isFpv)
             {
                 offset *= 0.9f;
