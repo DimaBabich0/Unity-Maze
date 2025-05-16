@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class MenuScript : MonoBehaviour
 {
     private GameObject content;
+    private float startTimeScale;
     private bool isMuted;
 
     private Slider singleSfxSlider;
@@ -11,37 +12,27 @@ public class MenuScript : MonoBehaviour
     private Slider musicSlider;
     private Toggle muteToggle;
 
+    private float defaultSingleSfxVolume;
+    private float defaultReusableSfxVolume;
+    private float defaultMusicVolume;
+    private bool defaultIsMuted;
+
     void Start()
     {
+        SetDefaultSettings();
         content = transform.Find("Content").gameObject;
-        HideMenu();
 
         singleSfxSlider = transform.Find("Content/Sounds/SliderSingleSFX").gameObject.GetComponent<Slider>();
         reusableSfxSlider = transform.Find("Content/Sounds/SliderReusableSFX").gameObject.GetComponent<Slider>();
         musicSlider = transform.Find("Content/Sounds/SliderMusic").gameObject.GetComponent<Slider>();
         muteToggle = transform.Find("Content/Sounds/ToggleMute").gameObject.GetComponent<Toggle>();
 
-        if (PlayerPrefs.HasKey("singleSfxVolume"))
-            GameState.singleSfxVolume = singleSfxSlider.value = PlayerPrefs.GetFloat("singleSfxVolume");
-        else
-            singleSfxSlider.value = GameState.singleSfxVolume;
-
-        if (PlayerPrefs.HasKey("reusableSfxVolume"))
-            GameState.reusableSfxVolume = reusableSfxSlider.value = PlayerPrefs.GetFloat("reusableSfxVolume");
-        else
-            reusableSfxSlider.value = GameState.reusableSfxVolume;
-
-        if (PlayerPrefs.HasKey("musicVolume"))
-            GameState.musicVolume = musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
-        else
-            musicSlider.value = GameState.musicVolume;
-
-        if (PlayerPrefs.HasKey("isMuted"))
-            muteToggle.isOn = isMuted = PlayerPrefs.GetInt("isMuted") == 1 ? true : false;
-        else
-            isMuted = muteToggle.isOn = false;
+        LoadSaveSettings();
 
         OnMuteValueChanged(isMuted);
+
+        startTimeScale = Time.timeScale;
+        HideMenu();
     }
 
     void Update()
@@ -62,14 +53,45 @@ public class MenuScript : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    private void SetDefaultSettings()
+    {
+        defaultSingleSfxVolume = GameState.singleSfxVolume;
+        defaultReusableSfxVolume = GameState.reusableSfxVolume;
+        defaultMusicVolume = GameState.musicVolume;
+        defaultIsMuted = false;
+    }
+    private void LoadSaveSettings()
+    {
+        if (PlayerPrefs.HasKey("singleSfxVolume"))
+            GameState.singleSfxVolume = singleSfxSlider.value = PlayerPrefs.GetFloat("singleSfxVolume");
+        else
+            singleSfxSlider.value = defaultSingleSfxVolume;
+
+        if (PlayerPrefs.HasKey("reusableSfxVolume"))
+            GameState.reusableSfxVolume = reusableSfxSlider.value = PlayerPrefs.GetFloat("reusableSfxVolume");
+        else
+            reusableSfxSlider.value = defaultReusableSfxVolume;
+
+        if (PlayerPrefs.HasKey("musicVolume"))
+            GameState.musicVolume = musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
+        else
+            musicSlider.value = defaultMusicVolume;
+
+        if (PlayerPrefs.HasKey("isMuted"))
+            muteToggle.isOn = isMuted = PlayerPrefs.GetInt("isMuted") == 1 ? true : false;
+        else
+            isMuted = muteToggle.isOn = defaultIsMuted;
+    }
+
     private void HideMenu()
     {
         content.SetActive(false);
-        Time.timeScale = 1.0f;
+        Time.timeScale = startTimeScale;
     }
     private void ShowMenu()
     {
         content.SetActive(true);
+        startTimeScale = Time.timeScale;
         Time.timeScale = 0.0f;
     }
 
@@ -109,5 +131,27 @@ public class MenuScript : MonoBehaviour
             GameState.reusableSfxVolume = reusableSfxSlider.value;
             GameState.musicVolume = musicSlider.value;
         }
+    }
+
+    public void OnContinueClick()
+    {
+        HideMenu();
+    }
+    public void OnDefaultsClick()
+    {
+        singleSfxSlider.value = defaultSingleSfxVolume;
+        reusableSfxSlider.value = defaultReusableSfxVolume;
+        musicSlider.value = defaultMusicVolume;
+        muteToggle.isOn = defaultIsMuted;
+    }
+    public void OnExitClick()
+    {
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+
+        #if UNITY_STANDALONE
+        Application.Quit();
+        #endif
     }
 }
