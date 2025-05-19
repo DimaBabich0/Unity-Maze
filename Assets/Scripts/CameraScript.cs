@@ -8,7 +8,7 @@ public class CameraScript : MonoBehaviour
     private float maxOffset = 5f;
 
     // cameraAnchor - точка привязки камеры
-    [SerializeField] private Transform cameraAnchor;
+    private Transform cameraAnchor;
 
     private InputAction lookAction;
     private float minAngleX = 15f;
@@ -44,6 +44,7 @@ public class CameraScript : MonoBehaviour
 
     void Start()
     {
+        cameraAnchor = GameObject.Find("Player").transform;
         offset = this.transform.position - cameraAnchor.position;
         lookAction = InputSystem.actions.FindAction("Look");
 

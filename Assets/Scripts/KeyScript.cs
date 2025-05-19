@@ -63,6 +63,9 @@ public class KeyScript : MonoBehaviour
     {
         if (obj.name == "Player")
         {
+            if (!GameState.inventory.ContainsKey($"key{keyColor}"))
+                GameState.inventory.Add($"key{keyColor}", 1);
+
             GameEventSystem.TriggerEvent(new GameEvent
             {
                 type = $"isKey{keyColor}Collected",

@@ -1,8 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Serializable]
+struct KeyElement
+{
+    public string color;
+    public Image image;
+}
+
 public class MenuScript : MonoBehaviour
 {
+    [SerializeField] private KeyElement[] inventoryImages;
+
     private GameObject content;
     private float startTimeScale;
     private bool isMuted;
@@ -93,6 +102,18 @@ public class MenuScript : MonoBehaviour
         content.SetActive(true);
         startTimeScale = Time.timeScale;
         Time.timeScale = 0.0f;
+
+        for (int i = 0; i < inventoryImages.Length; i++)
+        {
+            if (GameState.inventory.ContainsKey($"key{inventoryImages[i].color}"))
+            {
+                inventoryImages[i].image.enabled = true;
+            }
+            else
+            {
+                inventoryImages[i].image.enabled = false;
+            }
+        }
     }
 
     public void OnSingleSfxValueChanged(System.Single volume)

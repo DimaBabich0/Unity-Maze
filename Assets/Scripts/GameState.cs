@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameState
 {
+    public static Dictionary<string, int> inventory { get; } = new Dictionary<string, int>();
+
     #region bool isDay
     private static bool _isDay = true;
     public static bool isDay

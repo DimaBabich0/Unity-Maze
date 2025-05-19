@@ -6,9 +6,31 @@ public class PlayerScript : MonoBehaviour
     private Rigidbody rb;
     private InputAction moveAction;
 
+    private static PlayerScript prevInstance;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        // Switching between scenes, moving objects between scenes
+        if (prevInstance != null ) // check if there is another object with this class
+        {
+            // if so, we need to decice which object will remain: this or prevInstance
+
+            // a) remain this object and destroy prevInstance
+            //this.rb.linearVelocity = prevInstance.rb.linearVelocity;
+            //this.rb.angularVelocity = prevInstance.rb.angularVelocity;
+            //GameObject.Destroy(prevInstance.gameObject);
+
+            // b) remain prevInstance object and destroy this
+            GameObject.Destroy(this.gameObject);
+        }
+        else
+        {
+            prevInstance = this; // save reference on this object like static field
+        }
+
+        prevInstance.transform.position = Vector3.zero;
         moveAction = InputSystem.actions.FindAction("Move");
     }
 
