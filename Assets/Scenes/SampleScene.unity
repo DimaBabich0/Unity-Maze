@@ -15800,7 +15800,7 @@ GameObject:
   - component: {fileID: 1601422630}
   - component: {fileID: 1601422629}
   m_Layer: 5
-  m_Name: Canvas_UI
+  m_Name: Canvas_Toaster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

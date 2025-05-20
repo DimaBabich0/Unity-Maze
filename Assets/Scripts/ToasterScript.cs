@@ -20,6 +20,7 @@ public class ToasterScript : MonoBehaviour
 {
     private static ToasterScript instance;
     private const float showtime = 3.0f;
+    private float deltaTime = 0f;
 
     private GameObject content1;
     private TMPro.TextMeshProUGUI messageBox1;
@@ -52,10 +53,22 @@ public class ToasterScript : MonoBehaviour
         content2.SetActive(false);
 
         GameEventSystem.Subscribe(OnGameEvent);
+        
+        // info about FPS
+        var frameRate = Application.targetFrameRate;
+        var syncCount = QualitySettings.vSyncCount;
+        var rateRatio = Screen.currentResolution.refreshRateRatio;
+        Debug.Log($"targetFrameRate: {frameRate}, vSyncCount: {syncCount}, Screen: {rateRatio}");
+        deltaTime = 0f;
     }
 
     void Update()
     {
+        if (deltaTime == 0 || deltaTime > Time.deltaTime && Time.deltaTime > 0f)
+        {
+            deltaTime = Time.deltaTime;
+        }
+
         if (messages.Count > 0 && timeout1 <= 0)
         {
             Message m = messages.Dequeue();
@@ -76,7 +89,7 @@ public class ToasterScript : MonoBehaviour
 
         if (timeout1 > 0)
         {
-            timeout1 -= Time.deltaTime;
+            timeout1 -= getDt();
 
             if (messageTimeout1 - timeout1 < 1f) //fade in
                 contentGroup1.alpha = Mathf.Clamp01((messageTimeout1 - timeout1) * 5.0f);
@@ -116,7 +129,7 @@ public class ToasterScript : MonoBehaviour
 
         if (timeout2 > 0)
         {
-            timeout2 -= Time.deltaTime;
+            timeout2 -= getDt();
 
             if (messageTimeout2 - timeout2 < 1f) //fade in
                 contentGroup2.alpha = Mathf.Clamp01((messageTimeout2 - timeout2) * 5.0f);
@@ -129,6 +142,43 @@ public class ToasterScript : MonoBehaviour
                 timeout2 = 0.0f;
             }
         }
+    }
+
+    private float getDt()
+    {
+        var syncCount = QualitySettings.vSyncCount;
+        var rateRatio = Screen.currentResolution.refreshRateRatio.value;
+        var frameRate = Application.targetFrameRate;
+
+        float dt = 0f;
+        int intOption = 0;
+        if (Time.timeScale > 0f)
+        {
+            intOption = 1;
+            dt = Time.deltaTime;
+        }
+        else if (deltaTime > 0f)
+        {
+            intOption = 2;
+            dt = deltaTime;
+        }
+        else if (syncCount > 0)
+        {
+            intOption = 3;
+            dt = syncCount / (float)rateRatio;
+        }
+        else if (frameRate > 0)
+        {
+            intOption = 4;
+            dt = 1.0f / frameRate;
+        }
+        else
+        {
+            intOption = 5;
+            dt = 0.016f;
+        }
+        Debug.Log($"option #{intOption}\ndeltaTime: {dt}\nsyncCount: {syncCount}\nrateRation: {rateRatio}\nframeRate: {frameRate}");
+        return dt;
     }
 
     public static void Toast(string text, float time = 0.0f)
